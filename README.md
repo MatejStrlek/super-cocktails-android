@@ -1,26 +1,31 @@
-This is a Kotlin Multiplatform project targeting Android.
+# SuperCocktails
 
-* [/shared](./shared/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./shared/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./shared/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./shared/src/jvmMain/kotlin)
-    folder is the appropriate location.
+An Android app for searching cocktails, built with Kotlin Multiplatform. Pulls data from the CocktailDB API, caches results locally with Room, and follows a clean architecture setup — domain, data, and presentation layers split across the shared KMP module and the Android app module.
 
-### Running the apps
+## Stack
 
-Use the run configurations provided by the run widget in your IDE's toolbar. You can also use these commands and options:
+- **Ktor** — HTTP client for API calls
+- **Room** — local cache
+- **Koin** — dependency injection
+- **ViewModel + UiState** — presentation layer
 
-- Android app: `./gradlew :androidApp:assembleDebug`
+## Project layout
 
-### Running tests
+```
+shared/          # KMP module — domain, data, DI (used by all targets)
+androidApp/      # Android-specific UI and presentation layer
+```
 
-Use the run button in your IDE's editor gutter, or run tests using Gradle tasks:
+The `shared` module holds everything platform-agnostic: use cases, repository interfaces and implementations, local DB setup, and Koin modules. The `androidApp` module wires up the ViewModels and Compose UI.
 
-- Android tests: `./gradlew :shared:testAndroidHostTest`
+## Running the app
 
----
+```bash
+./gradlew :androidApp:assembleDebug
+```
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+## Running tests
+
+```bash
+./gradlew :shared:testAndroidHostTest
+```
