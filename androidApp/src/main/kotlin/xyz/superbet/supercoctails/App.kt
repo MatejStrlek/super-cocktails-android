@@ -9,10 +9,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import org.koin.compose.koinInject
+import xyz.superbet.supercoctails.data.model.Cocktail
+import xyz.superbet.supercoctails.domain.usecase.SearchCocktailsUseCase
 
 @Composable
 @Preview
 fun App() {
+    val useCase: SearchCocktailsUseCase = koinInject()
+    var cocktails by remember { mutableStateOf<List<Cocktail>>(emptyList()) }
+
+    LaunchedEffect(Unit) {
+        cocktails = useCase("Martini")
+    }
     MaterialTheme {
         Column(
             modifier = Modifier
@@ -20,7 +29,9 @@ fun App() {
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text("SuperCoctails")
+            cocktails.forEach { cocktail ->
+                Text(text = cocktail.name)
+            }
         }
     }
 }
