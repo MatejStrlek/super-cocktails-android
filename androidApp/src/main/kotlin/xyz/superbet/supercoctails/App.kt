@@ -5,23 +5,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import org.koin.compose.koinInject
-import xyz.superbet.supercoctails.data.model.Cocktail
-import xyz.superbet.supercoctails.domain.usecase.SearchCocktailsUseCase
+import org.koin.androidx.compose.koinViewModel
+import xyz.superbet.supercoctails.presentation.list.ListUiState
+import xyz.superbet.supercoctails.presentation.list.ListViewModel
 
 @Composable
 @Preview
 fun App() {
-    val useCase: SearchCocktailsUseCase = koinInject()
-    var cocktails by remember { mutableStateOf<List<Cocktail>>(emptyList()) }
+    val viewModel: ListViewModel = koinViewModel()
+    val uiState: ListUiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(Unit) {
-        cocktails = useCase("Martini")
-    }
     MaterialTheme {
         Column(
             modifier = Modifier
@@ -29,8 +28,14 @@ fun App() {
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            cocktails.forEach { cocktail ->
-                Text(text = cocktail.name)
+            when (val state = uiState) {
+                is ListUiState.Loading ->
+                    Text(text = "Loading...")
+                is ListUiState.Content -> {
+                    state.cocktails.forEach { cocktail ->
+                        Text(text = cocktail.name)
+                    }
+                }
             }
         }
     }

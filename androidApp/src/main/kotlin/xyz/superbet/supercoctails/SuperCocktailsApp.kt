@@ -3,6 +3,7 @@ package xyz.superbet.supercoctails
 import android.app.Application
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
+import xyz.superbet.supercoctails.di.androidModule
 import xyz.superbet.supercoctails.di.dataModule
 
 class SuperCocktailsApp : Application() {
@@ -12,7 +13,8 @@ class SuperCocktailsApp : Application() {
             androidContext(this@SuperCocktailsApp)
             modules(
                 dataModule,
-                androidModule)
+                androidModule
+            )
         }
     }
 }
