@@ -17,6 +17,6 @@ val dataModule = module {
             }
         }
     }
-    single<CocktailRepository> { CocktailRepositoryImpl(get()) }
+    single<CocktailRepository> { CocktailRepositoryImpl(get(), get()) }
     single { SearchCocktailsUseCase(get()) }
 }

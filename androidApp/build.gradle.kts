@@ -19,6 +19,8 @@ dependencies {
 
     implementation("io.insert-koin:koin-android:3.5.6")
     implementation("io.insert-koin:koin-androidx-compose:3.5.6")
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.sqlite.bundled)
 
     implementation(libs.compose.runtime)
     implementation(libs.compose.foundation)

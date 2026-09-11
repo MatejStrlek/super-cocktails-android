@@ -7,4 +7,5 @@ plugins {
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.kotlinSerialization) apply false
+    id("com.google.devtools.ksp") version "2.3.12" apply false
 }
