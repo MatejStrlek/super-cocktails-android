@@ -24,6 +24,15 @@ kotlin {
     }
 
     sourceSets {
+        commonMain.dependencies {
+            implementation("io.ktor:ktor-client-core:2.3.12")
+            implementation("io.insert-koin:koin-core:3.5.6")
+        }
+        androidMain.dependencies {
+            implementation("io.ktor:ktor-client-android:2.3.12")
+            implementation("io.insert-koin:koin-android:3.5.6")
+            implementation("io.insert-koin:koin-androidx-compose:3.5.6")
+        }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
