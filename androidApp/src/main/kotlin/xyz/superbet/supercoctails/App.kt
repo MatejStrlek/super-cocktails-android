@@ -36,6 +36,10 @@ fun App() {
                         Text(text = cocktail.name)
                     }
                 }
+                is ListUiState.Empty ->
+                    Text(text = "No cocktails found.")
+                is ListUiState.Error ->
+                    Text(text = "Error: ${state.message}")
             }
         }
     }

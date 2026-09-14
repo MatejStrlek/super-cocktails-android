@@ -5,4 +5,6 @@ import xyz.superbet.supercoctails.data.model.Cocktail
 sealed class ListUiState {
     object Loading : ListUiState()
     data class Content(val cocktails: List<Cocktail>) : ListUiState()
+    object Empty : ListUiState()
+    data class Error(val message: String) : ListUiState()
 }

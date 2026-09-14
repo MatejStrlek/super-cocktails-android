@@ -16,9 +16,22 @@ class ListViewModel (
     val uiState: StateFlow<ListUiState> = _uiState.asStateFlow()
 
     init {
+        search("margarita")
+    }
+
+    fun search(query: String) {
+        _uiState.value = ListUiState.Loading
         viewModelScope.launch {
-            val result = searchCocktailsUseCase("margarita")
-            _uiState.value = ListUiState.Content(result)
+            try {
+                val cocktails = searchCocktailsUseCase(query)
+                if (cocktails.isEmpty()) {
+                    _uiState.value = ListUiState.Empty
+                } else {
+                    _uiState.value = ListUiState.Content(cocktails)
+                }
+            } catch (e: Exception) {
+                _uiState.value = ListUiState.Error(e.message ?: "Something went wrong")
+            }
         }
     }
 }
