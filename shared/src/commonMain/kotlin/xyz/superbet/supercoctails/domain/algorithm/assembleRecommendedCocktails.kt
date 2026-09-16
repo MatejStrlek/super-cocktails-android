@@ -14,10 +14,12 @@ suspend fun assembleRecommendedCocktails(
     seedPool: List<String> = SEED_TERM_POOL,
     search: suspend (String) -> List<Cocktail>
 ): List<Cocktail> {
-    val seedTerm = seedPool.shuffled()
+    val initial = seedPool.shuffled().take(5)
+    val remaining = (seedPool - initial.toSet()).shuffled()
+    val termSequence = initial + remaining
     val result = LinkedHashMap<String, Cocktail>()
 
-    for (term in seedTerm) {
+    for (term in termSequence) {
         if (result.size >= TARGET_COUNT) break
         val matches = search(term).take(RESULTS_PER_TERM)
         for (cocktail in matches) {
