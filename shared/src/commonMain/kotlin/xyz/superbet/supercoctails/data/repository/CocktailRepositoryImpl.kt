@@ -7,9 +7,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import xyz.superbet.supercoctails.data.local.CocktailDao
+import xyz.superbet.supercoctails.data.mapper.toCocktail
 import xyz.superbet.supercoctails.data.mapper.toDomainModel
 import xyz.superbet.supercoctails.data.mapper.toEntityModel
-import xyz.superbet.supercoctails.data.model.Cocktail
+import xyz.superbet.supercoctails.domain.model.Cocktail
 import xyz.superbet.supercoctails.data.model.CocktailResponse
 import xyz.superbet.supercoctails.domain.algorithm.assembleRecommendedCocktails
 import xyz.superbet.supercoctails.domain.repository.CocktailRepository
@@ -45,7 +46,7 @@ class CocktailRepositoryImpl(
         val response: CocktailResponse = client
             .get("https://www.thecocktaildb.com/api/json/v1/1/search.php?s=$query")
             .body()
-        return response.drinks ?: emptyList()
+        return response.drinks?.map { it.toCocktail() } ?: emptyList()
     }
 
     private fun refreshInBackground(query: String) {
@@ -68,6 +69,10 @@ class CocktailRepositoryImpl(
                 category = new.category,
                 alcoholic = new.alcoholic,
                 thumbnail = new.thumbnail,
+                glass = new.glass,
+                instructions = new.instructions,
+                dateModified = new.dateModified,
+                ingredients = new.ingredients,
             ) ?: new
         }
         cocktailDao.upsertCocktails(merged)

@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import xyz.superbet.supercoctails.domain.model.Cocktail
 import xyz.superbet.supercoctails.domain.usecase.GetRecommendedCocktailsUseCase
 import xyz.superbet.supercoctails.domain.usecase.SearchCocktailsUseCase
 import kotlin.time.Duration.Companion.milliseconds
@@ -20,18 +22,30 @@ class ListViewModel(
     private val getRecommendedCocktailsUseCase: GetRecommendedCocktailsUseCase,
 ) : ViewModel() {
     private val searchQuery = MutableStateFlow("")
+    private var cachedRecommendedCocktails: List<Cocktail>? = null
+
+    init {
+        viewModelScope.launch {
+            try {
+                cachedRecommendedCocktails = getRecommendedCocktailsUseCase()
+                if (searchQuery.value.isBlank()) {
+                    searchQuery.value = ""
+                }
+            } catch (_: Exception) { }
+        }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     val uiState: StateFlow<ListUiState> = searchQuery
         .debounce(300.milliseconds)
         .flatMapLatest { query ->
-            if(query.isBlank()) {
+            if (query.isBlank()) {
                 flow {
-                    try {
-                        val cocktails = getRecommendedCocktailsUseCase()
-                        emit(if (cocktails.isEmpty()) ListUiState.Empty else ListUiState.Content(cocktails))
-                    } catch (e: Exception) {
-                        emit(ListUiState.Error(e.message ?: "Something went wrong"))
+                    val recommended = cachedRecommendedCocktails
+                    if (recommended == null) {
+                        emit(ListUiState.Loading)
+                    } else {
+                        emit(if (recommended.isEmpty()) ListUiState.Empty else ListUiState.Content(recommended))
                     }
                 }
             } else {

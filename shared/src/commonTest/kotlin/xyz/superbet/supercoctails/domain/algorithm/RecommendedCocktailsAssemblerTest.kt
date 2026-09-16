@@ -1,13 +1,13 @@
 package xyz.superbet.supercoctails.domain.algorithm
 
 import kotlinx.coroutines.test.runTest
-import xyz.superbet.supercoctails.data.model.Cocktail
+import xyz.superbet.supercoctails.domain.model.Cocktail
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class RecommendedCocktailsAssemblerTest {
-    private fun cocktail(id: String) = Cocktail(id = id, name = "Cocktail $id")
+    private fun cocktail(id: String) = Cocktail(id = id, name = "Cocktail $id", category = null, alcoholic = null, thumbnail = null)
 
     @Test
     fun deduplicatesRepeatedCocktailsAcrossTerms() = runTest {

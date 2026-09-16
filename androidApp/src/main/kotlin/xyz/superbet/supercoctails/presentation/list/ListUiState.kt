@@ -1,6 +1,6 @@
 package xyz.superbet.supercoctails.presentation.list
 
-import xyz.superbet.supercoctails.data.model.Cocktail
+import xyz.superbet.supercoctails.domain.model.Cocktail
 
 sealed class ListUiState {
     object Loading : ListUiState()

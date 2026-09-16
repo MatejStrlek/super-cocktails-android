@@ -9,6 +9,10 @@ plugins {
 
 kotlin {
 
+    sourceSets.all {
+        languageSettings.optIn("kotlinx.serialization.InternalSerializationApi")
+    }
+
     android {
         namespace = "xyz.superbet.supercoctails.shared"
         compileSdk = libs.versions.android.compileSdk.get().toInt()

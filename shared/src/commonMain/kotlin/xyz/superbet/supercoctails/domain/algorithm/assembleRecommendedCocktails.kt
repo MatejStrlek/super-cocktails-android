@@ -1,6 +1,6 @@
 package xyz.superbet.supercoctails.domain.algorithm
 
-import xyz.superbet.supercoctails.data.model.Cocktail
+import xyz.superbet.supercoctails.domain.model.Cocktail
 private const val TARGET_COUNT = 10
 private const val RESULTS_PER_TERM = 2
 
