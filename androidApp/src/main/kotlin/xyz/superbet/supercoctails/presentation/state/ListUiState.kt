@@ -1,4 +1,4 @@
-package xyz.superbet.supercoctails.presentation.list
+package xyz.superbet.supercoctails.presentation.state
 
 import xyz.superbet.supercoctails.domain.model.Cocktail
 

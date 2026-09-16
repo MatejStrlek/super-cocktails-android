@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import xyz.superbet.supercoctails.domain.model.Cocktail
 import xyz.superbet.supercoctails.domain.usecase.GetRecommendedCocktailsUseCase
 import xyz.superbet.supercoctails.domain.usecase.SearchCocktailsUseCase
+import xyz.superbet.supercoctails.presentation.state.ListUiState
 import kotlin.time.Duration.Companion.milliseconds
 
 class ListViewModel(

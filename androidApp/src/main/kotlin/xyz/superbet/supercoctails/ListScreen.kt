@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import org.koin.androidx.compose.koinViewModel
 import xyz.superbet.supercoctails.presentation.list.ListTopBar
-import xyz.superbet.supercoctails.presentation.list.ListUiState
+import xyz.superbet.supercoctails.presentation.state.ListUiState
 import xyz.superbet.supercoctails.presentation.list.ListViewModel
 
 @Composable
