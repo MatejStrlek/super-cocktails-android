@@ -22,7 +22,7 @@ fun SplashScreen(onTimeout: () -> Unit) {
     val appScope: CoroutineScope = koinInject()
 
     LaunchedEffect(Unit) {
-        appScope.launch { useCase() }
+        appScope.launch { runCatching { useCase() } }
         delay(1500.milliseconds)
         onTimeout()
     }

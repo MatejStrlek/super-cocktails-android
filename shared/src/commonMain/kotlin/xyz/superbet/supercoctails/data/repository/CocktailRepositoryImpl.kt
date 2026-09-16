@@ -26,7 +26,7 @@ class CocktailRepositoryImpl(
         }
 
         val refresh = fetchFromNetwork(query)
-        cocktailDao.upsertCocktails(refresh.map { it.toEntityModel() })
+        upsertPreservingFlags(refresh)
         return refresh
     }
 
@@ -52,10 +52,24 @@ class CocktailRepositoryImpl(
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val refresh = fetchFromNetwork(query)
-                cocktailDao.upsertCocktails(refresh.map { it.toEntityModel() })
+                upsertPreservingFlags(refresh)
             } catch (_: Exception) {
                 // network unavailable so cache stays as-is
             }
         }
+    }
+
+    private suspend fun upsertPreservingFlags(cocktails: List<Cocktail>) {
+        val incoming = cocktails.map { it.toEntityModel() }
+        val existing = cocktailDao.getByIds(incoming.map { it.id }).associateBy { it.id }
+        val merged = incoming.map { new ->
+            existing[new.id]?.copy(
+                name = new.name,
+                category = new.category,
+                alcoholic = new.alcoholic,
+                thumbnail = new.thumbnail,
+            ) ?: new
+        }
+        cocktailDao.upsertCocktails(merged)
     }
 }
