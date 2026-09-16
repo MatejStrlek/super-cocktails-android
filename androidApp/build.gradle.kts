@@ -19,6 +19,7 @@ dependencies {
 
     implementation("io.insert-koin:koin-android:3.5.6")
     implementation("io.insert-koin:koin-androidx-compose:3.5.6")
+    implementation("androidx.navigation:navigation-compose:2.8.3")
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.sqlite.bundled)
 

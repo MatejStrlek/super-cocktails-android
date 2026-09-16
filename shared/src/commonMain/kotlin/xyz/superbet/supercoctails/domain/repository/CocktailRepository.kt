@@ -4,4 +4,5 @@ import xyz.superbet.supercoctails.data.model.Cocktail
 
 interface CocktailRepository {
     suspend fun searchCocktails(query: String): List<Cocktail>
+    suspend fun getRecommendedCocktails(): List<Cocktail>
 }

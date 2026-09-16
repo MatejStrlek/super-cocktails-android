@@ -10,5 +10,6 @@ data class CocktailEntity(
     val category: String?,
     val alcoholic: String?,
     val thumbnail: String?,
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val isRecommended: Boolean = false,
 )

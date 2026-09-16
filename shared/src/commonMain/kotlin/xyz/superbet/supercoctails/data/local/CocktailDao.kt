@@ -11,4 +11,7 @@ interface CocktailDao {
 
     @Upsert
     suspend fun upsertCocktails(cocktails: List<CocktailEntity>)
+
+    @Query("SELECT * FROM cocktails WHERE isRecommended = 1")
+    suspend fun getRecommendedCocktails(): List<CocktailEntity>
 }

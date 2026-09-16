@@ -17,7 +17,7 @@ import xyz.superbet.supercoctails.presentation.list.ListViewModel
 
 @Composable
 @Preview
-fun App() {
+fun ListScreen() {
     val viewModel: ListViewModel = koinViewModel()
     val uiState: ListUiState by viewModel.uiState.collectAsState()
 

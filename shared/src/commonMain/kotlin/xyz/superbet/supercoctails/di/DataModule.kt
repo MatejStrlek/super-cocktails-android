@@ -8,6 +8,7 @@ import org.koin.dsl.module
 import xyz.superbet.supercoctails.data.repository.CocktailRepositoryImpl
 import xyz.superbet.supercoctails.domain.repository.CocktailRepository
 import xyz.superbet.supercoctails.domain.usecase.SearchCocktailsUseCase
+import xyz.superbet.supercoctails.domain.usecase.GetRecommendedCocktailsUseCase
 
 val dataModule = module {
     single {
@@ -19,4 +20,5 @@ val dataModule = module {
     }
     single<CocktailRepository> { CocktailRepositoryImpl(get(), get()) }
     single { SearchCocktailsUseCase(get()) }
+    single { GetRecommendedCocktailsUseCase(get()) }
 }

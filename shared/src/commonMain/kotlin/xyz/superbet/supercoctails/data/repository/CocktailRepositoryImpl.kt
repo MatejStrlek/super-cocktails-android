@@ -9,9 +9,10 @@ import kotlinx.coroutines.launch
 import xyz.superbet.supercoctails.data.local.CocktailDao
 import xyz.superbet.supercoctails.data.mapper.toDomainModel
 import xyz.superbet.supercoctails.data.mapper.toEntityModel
-import xyz.superbet.supercoctails.domain.repository.CocktailRepository
 import xyz.superbet.supercoctails.data.model.Cocktail
 import xyz.superbet.supercoctails.data.model.CocktailResponse
+import xyz.superbet.supercoctails.domain.algorithm.assembleRecommendedCocktails
+import xyz.superbet.supercoctails.domain.repository.CocktailRepository
 
 class CocktailRepositoryImpl(
     private val client: HttpClient,
@@ -27,6 +28,17 @@ class CocktailRepositoryImpl(
         val refresh = fetchFromNetwork(query)
         cocktailDao.upsertCocktails(refresh.map { it.toEntityModel() })
         return refresh
+    }
+
+    override suspend fun getRecommendedCocktails(): List<Cocktail> {
+        val cached = cocktailDao.getRecommendedCocktails()
+        if (cached.isNotEmpty()) {
+            return cached.map { it.toDomainModel() }
+        }
+
+        val assembled = assembleRecommendedCocktails(search = { query -> searchCocktails(query) } )
+        cocktailDao.upsertCocktails(assembled.map { it.toEntityModel().copy(isRecommended = true) })
+        return assembled
     }
 
     private suspend fun fetchFromNetwork(query: String): List<Cocktail> {
