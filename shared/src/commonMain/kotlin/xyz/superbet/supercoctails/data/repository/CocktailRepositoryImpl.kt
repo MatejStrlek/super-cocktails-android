@@ -26,9 +26,18 @@ class CocktailRepositoryImpl(
             return cached.map { it.toDomainModel() }
         }
 
-        val refresh = fetchFromNetwork(query)
+        val refresh = fetchQueryFromNetwork(query)
         upsertPreservingFlags(refresh)
         return refresh
+    }
+
+    override suspend fun getCocktailById(id: String): Cocktail? {
+        val cached = cocktailDao.getById(id)
+        if (cached != null) {
+            revalidateInBackground(id)
+            return cached.toDomainModel()
+        }
+        return fetchCocktailByIdFromNetwork(id)?.also { upsertPreservingFlags(listOf(it)) }
     }
 
     override suspend fun getRecommendedCocktails(): List<Cocktail> {
@@ -42,17 +51,35 @@ class CocktailRepositoryImpl(
         return assembled
     }
 
-    private suspend fun fetchFromNetwork(query: String): List<Cocktail> {
+    private fun revalidateInBackground(id: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val fresh = fetchCocktailByIdFromNetwork(id) ?: return@launch
+                upsertPreservingFlags(listOf(fresh))
+            } catch (_: Exception) {
+                // network unavailable so cache stays as-is
+            }
+        }
+    }
+
+    private suspend fun fetchQueryFromNetwork(query: String): List<Cocktail> {
         val response: CocktailResponse = client
             .get("https://www.thecocktaildb.com/api/json/v1/1/search.php?s=$query")
             .body()
         return response.drinks?.map { it.toCocktail() } ?: emptyList()
     }
 
+    private suspend fun fetchCocktailByIdFromNetwork(id: String): Cocktail? {
+        val response: CocktailResponse = client
+            .get("https://www.thecocktaildb.com/api/json/v1/1/lookup.php?i=$id")
+            .body()
+        return response.drinks?.firstOrNull()?.toCocktail()
+    }
+
     private fun refreshInBackground(query: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val refresh = fetchFromNetwork(query)
+                val refresh = fetchQueryFromNetwork(query)
                 upsertPreservingFlags(refresh)
             } catch (_: Exception) {
                 // network unavailable so cache stays as-is

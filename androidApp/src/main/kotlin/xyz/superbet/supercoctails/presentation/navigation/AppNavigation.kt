@@ -4,7 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import xyz.superbet.supercoctails.ListScreen
+import xyz.superbet.supercoctails.presentation.list.ListScreen
+import xyz.superbet.supercoctails.presentation.detail.DetailScreen
 import xyz.superbet.supercoctails.presentation.splash.SplashScreen
 
 @Composable
@@ -20,7 +21,14 @@ fun AppNavigation() {
             })
         }
         composable("list") {
-            ListScreen()
+            ListScreen(onCocktailClick = { id -> navController.navigate("detail/$id") })
+        }
+        composable("detail/{cocktailId}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("cocktailId") ?: return@composable
+            DetailScreen(
+                cocktailId = id,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }

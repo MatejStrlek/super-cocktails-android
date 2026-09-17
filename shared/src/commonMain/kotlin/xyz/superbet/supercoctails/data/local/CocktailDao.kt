@@ -17,4 +17,7 @@ interface CocktailDao {
 
     @Query("SELECT * FROM cocktails WHERE id IN (:ids)")
     suspend fun getByIds(ids: List<String>): List<CocktailEntity>
+
+    @Query("SELECT * FROM cocktails WHERE id = :id")
+    suspend fun getById(id: String): CocktailEntity?
 }

@@ -21,6 +21,8 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-compose:3.5.6")
     implementation("androidx.navigation:navigation-compose:2.8.3")
     implementation("androidx.compose.material:material-icons-extended:1.7.5")
+    implementation("io.coil-kt.coil3:coil-compose:3.2.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.2.0")
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.sqlite.bundled)
 

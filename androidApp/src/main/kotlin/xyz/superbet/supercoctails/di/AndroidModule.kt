@@ -9,6 +9,7 @@ import org.koin.dsl.module
 import xyz.superbet.supercoctails.SuperCocktailsApp
 import xyz.superbet.supercoctails.data.local.AppDatabase
 import xyz.superbet.supercoctails.presentation.list.ListViewModel
+import xyz.superbet.supercoctails.presentation.detail.DetailViewModel
 
 val androidModule = module {
     single<AppDatabase> {
@@ -23,5 +24,6 @@ val androidModule = module {
     }
     single { get<AppDatabase>().cocktailDao() }
     viewModel { ListViewModel(get(), get()) }
+    viewModel { DetailViewModel(get()) }
     single { (androidContext() as SuperCocktailsApp).applicationScope }
 }
