@@ -51,8 +51,8 @@ import xyz.superbet.supercoctails.presentation.state.ListUiState
 fun ListScreen(onCocktailClick: (String) -> Unit = {}) {
     val viewModel: ListViewModel = koinViewModel()
     val uiState: ListUiState by viewModel.uiState.collectAsState()
+    val query by viewModel.searchQuery.collectAsState()
 
-    var query by remember { mutableStateOf("") }
     var hasEverFocusedSearch by remember { mutableStateOf(false) }
 
     MaterialTheme {
@@ -63,10 +63,7 @@ fun ListScreen(onCocktailClick: (String) -> Unit = {}) {
         ) {
             ListTopBar(
                 query = query,
-                onQueryChanged = {
-                    query = it
-                    viewModel.onQueryChanged(it)
-                },
+                onQueryChanged = { viewModel.onQueryChanged(it) },
                 hasEverFocusedSearch = hasEverFocusedSearch,
                 showRecommendedLabel = uiState is ListUiState.Content && query.isBlank()
             )

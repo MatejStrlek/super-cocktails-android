@@ -7,6 +7,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
@@ -25,10 +26,11 @@ class ListViewModel(
     private val getRecommendedCocktailsUseCase: GetRecommendedCocktailsUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
 ) : ViewModel() {
-    private val searchQuery = MutableStateFlow("")
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-    val uiState: StateFlow<ListUiState> = searchQuery
+    val uiState: StateFlow<ListUiState> = _searchQuery
         .debounce(300.milliseconds)
         .flatMapLatest { query ->
             if (query.isBlank()) {
@@ -47,7 +49,7 @@ class ListViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ListUiState.Loading)
 
     fun onQueryChanged(query: String) {
-        searchQuery.value = query
+        _searchQuery.value = query
     }
 
     fun toggleFavorite(id: String) {
