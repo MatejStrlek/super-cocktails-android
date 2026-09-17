@@ -7,13 +7,13 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import xyz.superbet.supercoctails.domain.model.Cocktail
 import xyz.superbet.supercoctails.domain.usecase.GetRecommendedCocktailsUseCase
 import xyz.superbet.supercoctails.domain.usecase.SearchCocktailsUseCase
 import xyz.superbet.supercoctails.domain.usecase.ToggleFavoriteUseCase
@@ -26,43 +26,22 @@ class ListViewModel(
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
 ) : ViewModel() {
     private val searchQuery = MutableStateFlow("")
-    private val refreshTrigger = MutableStateFlow(0)
-    private var cachedRecommendedCocktails: List<Cocktail>? = null
-
-    init {
-        viewModelScope.launch {
-            try {
-                cachedRecommendedCocktails = getRecommendedCocktailsUseCase()
-                if (searchQuery.value.isBlank()) {
-                    searchQuery.value = ""
-                }
-            } catch (_: Exception) { }
-        }
-    }
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-    val uiState: StateFlow<ListUiState> = combine(searchQuery, refreshTrigger) { query, _ -> query }
+    val uiState: StateFlow<ListUiState> = searchQuery
         .debounce(300.milliseconds)
         .flatMapLatest { query ->
             if (query.isBlank()) {
-                flow {
-                    val recommended = cachedRecommendedCocktails
-                    if (recommended == null) {
-                        emit(ListUiState.Loading)
-                    } else {
-                        emit(if (recommended.isEmpty()) ListUiState.Empty else ListUiState.Content(recommended))
-                    }
+                getRecommendedCocktailsUseCase().map { cocktails ->
+                    if (cocktails.isEmpty()) ListUiState.Loading else ListUiState.Content(cocktails)
                 }
             } else {
-                flow {
-                    emit(ListUiState.Loading)
-                    try {
-                        val cocktails = searchCocktailsUseCase(query)
-                        emit(if (cocktails.isEmpty()) ListUiState.Empty else ListUiState.Content(cocktails))
-                    } catch (e: Exception) {
-                        emit(ListUiState.Error(e.message ?: "Something went wrong"))
+                searchCocktailsUseCase(query)
+                    .map { cocktails ->
+                        if (cocktails.isEmpty()) ListUiState.Empty else ListUiState.Content(cocktails)
                     }
-                }
+                    .onStart { emit(ListUiState.Loading) }
+                    .catch { e -> emit(ListUiState.Error(e.message ?: "Something went wrong")) }
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ListUiState.Loading)
@@ -72,10 +51,6 @@ class ListViewModel(
     }
 
     fun toggleFavorite(id: String) {
-        viewModelScope.launch {
-            toggleFavoriteUseCase(id)
-            cachedRecommendedCocktails = getRecommendedCocktailsUseCase()
-            refreshTrigger.value++
-        }
+        viewModelScope.launch { toggleFavoriteUseCase(id) }
     }
 }

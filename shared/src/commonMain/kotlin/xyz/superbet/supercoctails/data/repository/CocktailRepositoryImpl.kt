@@ -5,6 +5,11 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import xyz.superbet.supercoctails.data.local.CocktailDao
 import xyz.superbet.supercoctails.data.mapper.toCocktail
@@ -19,16 +24,15 @@ class CocktailRepositoryImpl(
     private val client: HttpClient,
     private val cocktailDao: CocktailDao
 ) : CocktailRepository {
-    override suspend fun searchCocktails(query: String): List<Cocktail> {
-        val cached = cocktailDao.searchCocktails(query)
-        if (cached.isNotEmpty()) {
+    override fun searchCocktails(query: String): Flow<List<Cocktail>> = flow {
+        val cached = cocktailDao.searchCocktails(query).first()
+        if (cached.isEmpty()) {
+            val refresh = fetchQueryFromNetwork(query)
+            upsertPreservingFlags(refresh)
+        } else {
             refreshInBackground(query)
-            return cached.map { it.toDomainModel() }
         }
-
-        val refresh = fetchQueryFromNetwork(query)
-        upsertPreservingFlags(refresh)
-        return refresh
+        emitAll(cocktailDao.searchCocktails(query).map { list -> list.map { it.toDomainModel() } })
     }
 
     override suspend fun getCocktailById(id: String): Cocktail? {
@@ -40,15 +44,13 @@ class CocktailRepositoryImpl(
         return fetchCocktailByIdFromNetwork(id)?.also { upsertPreservingFlags(listOf(it)) }
     }
 
-    override suspend fun getRecommendedCocktails(): List<Cocktail> {
-        val cached = cocktailDao.getRecommendedCocktails()
-        if (cached.isNotEmpty()) {
-            return cached.map { it.toDomainModel() }
+    override fun getRecommendedCocktails(): Flow<List<Cocktail>> = flow {
+        val cached = cocktailDao.getRecommendedCocktails().first()
+        if (cached.isEmpty()) {
+            val assembled = assembleRecommendedCocktails(search = { query -> fetchQueryFromNetwork(query) })
+            cocktailDao.upsertCocktails(assembled.map { it.toEntityModel().copy(isRecommended = true) })
         }
-
-        val assembled = assembleRecommendedCocktails(search = { query -> searchCocktails(query) } )
-        cocktailDao.upsertCocktails(assembled.map { it.toEntityModel().copy(isRecommended = true) })
-        return assembled
+        emitAll(cocktailDao.getRecommendedCocktails().map { list -> list.map { it.toDomainModel() } })
     }
 
     private fun revalidateInBackground(id: String) {
