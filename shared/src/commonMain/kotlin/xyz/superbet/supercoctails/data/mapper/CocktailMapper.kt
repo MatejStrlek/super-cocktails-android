@@ -43,6 +43,7 @@ fun CocktailEntity.toDomainModel() = Cocktail(
     instructions = instructions,
     dateModified = dateModified,
     ingredients = ingredients,
+    isFavorite = isFavorite,
 )
 
 fun Cocktail.toEntityModel() = CocktailEntity(

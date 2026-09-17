@@ -7,6 +7,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -15,14 +16,17 @@ import kotlinx.coroutines.launch
 import xyz.superbet.supercoctails.domain.model.Cocktail
 import xyz.superbet.supercoctails.domain.usecase.GetRecommendedCocktailsUseCase
 import xyz.superbet.supercoctails.domain.usecase.SearchCocktailsUseCase
+import xyz.superbet.supercoctails.domain.usecase.ToggleFavoriteUseCase
 import xyz.superbet.supercoctails.presentation.state.ListUiState
 import kotlin.time.Duration.Companion.milliseconds
 
 class ListViewModel(
     private val searchCocktailsUseCase: SearchCocktailsUseCase,
     private val getRecommendedCocktailsUseCase: GetRecommendedCocktailsUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
 ) : ViewModel() {
     private val searchQuery = MutableStateFlow("")
+    private val refreshTrigger = MutableStateFlow(0)
     private var cachedRecommendedCocktails: List<Cocktail>? = null
 
     init {
@@ -37,7 +41,7 @@ class ListViewModel(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-    val uiState: StateFlow<ListUiState> = searchQuery
+    val uiState: StateFlow<ListUiState> = combine(searchQuery, refreshTrigger) { query, _ -> query }
         .debounce(300.milliseconds)
         .flatMapLatest { query ->
             if (query.isBlank()) {
@@ -65,5 +69,13 @@ class ListViewModel(
 
     fun onQueryChanged(query: String) {
         searchQuery.value = query
+    }
+
+    fun toggleFavorite(id: String) {
+        viewModelScope.launch {
+            toggleFavoriteUseCase(id)
+            cachedRecommendedCocktails = getRecommendedCocktailsUseCase()
+            refreshTrigger.value++
+        }
     }
 }

@@ -7,10 +7,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import xyz.superbet.supercoctails.domain.usecase.GetCocktailByIdUseCase
+import xyz.superbet.supercoctails.domain.usecase.ToggleFavoriteUseCase
 import xyz.superbet.supercoctails.presentation.state.DetailUiState
 
 class DetailViewModel(
     private val getCocktailByIdUseCase: GetCocktailByIdUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<DetailUiState>(DetailUiState.Loading)
     val uiState: StateFlow<DetailUiState> = _uiState.asStateFlow()
@@ -23,6 +25,14 @@ class DetailViewModel(
             } catch (_: Exception) {
                 _uiState.value = DetailUiState.Error
             }
+        }
+    }
+
+    fun toggleFavorite(id: String) {
+        viewModelScope.launch {
+            toggleFavoriteUseCase(id)
+            // reload so the star icon reflects the new state immediately
+            load(id)
         }
     }
 }

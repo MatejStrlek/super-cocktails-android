@@ -9,5 +9,6 @@ data class Cocktail(
     val glass: String? = null,
     val instructions: String? = null,
     val dateModified: String? = null,
-    val ingredients: List<Ingredient> = emptyList()
+    val ingredients: List<Ingredient> = emptyList(),
+    val isFavorite: Boolean = false
 )

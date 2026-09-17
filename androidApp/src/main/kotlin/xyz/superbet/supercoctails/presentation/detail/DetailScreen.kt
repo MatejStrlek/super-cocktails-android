@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -67,13 +68,14 @@ fun DetailScreen(cocktailId: String, onBack: () -> Unit) {
 
         is DetailUiState.Content -> DetailContent(
             cocktail = state.cocktail,
-            onBack = onBack
+            onBack = onBack,
+            onFavoriteClick = { viewModel.toggleFavorite(state.cocktail.id) }
         )
     }
 }
 
 @Composable
-private fun DetailContent(cocktail: Cocktail, onBack: () -> Unit) {
+private fun DetailContent(cocktail: Cocktail, onBack: () -> Unit, onFavoriteClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -135,12 +137,14 @@ private fun DetailContent(cocktail: Cocktail, onBack: () -> Unit) {
                     style = MaterialTheme.typography.headlineLarge,
                     modifier = Modifier.weight(1f)
                 )
-                Icon(
-                    imageVector = Icons.Outlined.StarBorder,
-                    contentDescription = "Favorite",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(30.dp)
-                )
+                IconButton(onClick = onFavoriteClick, modifier = Modifier.size(36.dp)) {
+                    Icon(
+                        imageVector = if (cocktail.isFavorite) Icons.Default.Star else Icons.Outlined.StarBorder,
+                        contentDescription = if (cocktail.isFavorite) "Remove from favorites" else "Add to favorites",
+                        tint = if (cocktail.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(26.dp)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))

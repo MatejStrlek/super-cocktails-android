@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -94,7 +95,11 @@ fun ListScreen(onCocktailClick: (String) -> Unit = {}) {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(state.cocktails, key = { it.id }) { cocktail ->
-                        CocktailRow(cocktail = cocktail, onClick = { onCocktailClick(cocktail.id) })
+                        CocktailRow(
+                            cocktail = cocktail,
+                            onClick = { onCocktailClick(cocktail.id) },
+                            onFavoriteClick = { viewModel.toggleFavorite(cocktail.id) }
+                        )
                     }
                 }
 
@@ -176,7 +181,7 @@ fun ListScreen(onCocktailClick: (String) -> Unit = {}) {
 }
 
 @Composable
-private fun CocktailRow(cocktail: Cocktail, onClick: () -> Unit) {
+private fun CocktailRow(cocktail: Cocktail, onClick: () -> Unit, onFavoriteClick: () -> Unit) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
@@ -197,7 +202,10 @@ private fun CocktailRow(cocktail: Cocktail, onClick: () -> Unit) {
                     .clip(RoundedCornerShape(14.dp))
             )
 
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 Text(
                     text = cocktail.name,
                     fontWeight = FontWeight.SemiBold,
@@ -232,12 +240,14 @@ private fun CocktailRow(cocktail: Cocktail, onClick: () -> Unit) {
                 }
             }
 
-            Icon(
-                imageVector = Icons.Default.StarBorder,
-                contentDescription = "Favorite",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(35.dp)
-            )
+            IconButton(onClick = onFavoriteClick, modifier = Modifier.size(36.dp)) {
+                Icon(
+                    imageVector = if (cocktail.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
+                    contentDescription = if (cocktail.isFavorite) "Remove from favorites" else "Add to favorites",
+                    tint = if (cocktail.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
         }
     }
 }

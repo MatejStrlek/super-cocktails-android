@@ -6,4 +6,5 @@ interface CocktailRepository {
     suspend fun searchCocktails(query: String): List<Cocktail>
     suspend fun getRecommendedCocktails(): List<Cocktail>
     suspend fun getCocktailById(id: String): Cocktail?
+    suspend fun toggleFavorite(id: String)
 }

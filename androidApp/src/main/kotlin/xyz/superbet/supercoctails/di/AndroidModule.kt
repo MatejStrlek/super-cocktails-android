@@ -23,7 +23,7 @@ val androidModule = module {
             .build()
     }
     single { get<AppDatabase>().cocktailDao() }
-    viewModel { ListViewModel(get(), get()) }
-    viewModel { DetailViewModel(get()) }
+    viewModel { ListViewModel(get(), get(), get()) }
+    viewModel { DetailViewModel(get(), get()) }
     single { (androidContext() as SuperCocktailsApp).applicationScope }
 }

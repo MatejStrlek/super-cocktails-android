@@ -87,6 +87,10 @@ class CocktailRepositoryImpl(
         }
     }
 
+    override suspend fun toggleFavorite(id: String) {
+        cocktailDao.toggleFavorite(id)
+    }
+
     private suspend fun upsertPreservingFlags(cocktails: List<Cocktail>) {
         val incoming = cocktails.map { it.toEntityModel() }
         val existing = cocktailDao.getByIds(incoming.map { it.id }).associateBy { it.id }

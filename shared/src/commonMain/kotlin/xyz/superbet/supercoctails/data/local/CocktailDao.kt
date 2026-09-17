@@ -20,4 +20,7 @@ interface CocktailDao {
 
     @Query("SELECT * FROM cocktails WHERE id = :id")
     suspend fun getById(id: String): CocktailEntity?
+
+    @Query("UPDATE cocktails SET isFavorite = CASE WHEN isFavorite = 1 THEN 0 ELSE 1 END WHERE id = :id")
+    suspend fun toggleFavorite(id: String)
 }
