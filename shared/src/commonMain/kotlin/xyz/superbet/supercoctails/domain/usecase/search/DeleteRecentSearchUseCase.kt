@@ -1,4 +1,4 @@
-package xyz.superbet.supercoctails.domain.usecase
+package xyz.superbet.supercoctails.domain.usecase.search
 
 import xyz.superbet.supercoctails.domain.repository.RecentSearchRepository
 

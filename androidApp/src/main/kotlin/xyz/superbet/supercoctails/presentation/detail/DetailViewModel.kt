@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import xyz.superbet.supercoctails.domain.usecase.GetCocktailByIdUseCase
-import xyz.superbet.supercoctails.domain.usecase.ToggleFavoriteUseCase
+import xyz.superbet.supercoctails.domain.usecase.cocktail.GetCocktailByIdUseCase
+import xyz.superbet.supercoctails.domain.usecase.cocktail.ToggleFavoriteUseCase
 import xyz.superbet.supercoctails.presentation.state.DetailUiState
 
 class DetailViewModel(

@@ -7,13 +7,13 @@ import kotlinx.serialization.json.Json
 import org.koin.dsl.module
 import xyz.superbet.supercoctails.data.repository.CocktailRepositoryImpl
 import xyz.superbet.supercoctails.domain.repository.CocktailRepository
-import xyz.superbet.supercoctails.domain.usecase.SearchCocktailsUseCase
-import xyz.superbet.supercoctails.domain.usecase.GetRecommendedCocktailsUseCase
-import xyz.superbet.supercoctails.domain.usecase.GetCocktailByIdUseCase
-import xyz.superbet.supercoctails.domain.usecase.ToggleFavoriteUseCase
-import xyz.superbet.supercoctails.domain.usecase.GetRecentSearchesUseCase
-import xyz.superbet.supercoctails.domain.usecase.AddRecentSearchUseCase
-import xyz.superbet.supercoctails.domain.usecase.DeleteRecentSearchUseCase
+import xyz.superbet.supercoctails.domain.usecase.cocktail.GetCocktailByIdUseCase
+import xyz.superbet.supercoctails.domain.usecase.cocktail.GetRecommendedCocktailsUseCase
+import xyz.superbet.supercoctails.domain.usecase.cocktail.SearchCocktailsUseCase
+import xyz.superbet.supercoctails.domain.usecase.cocktail.ToggleFavoriteUseCase
+import xyz.superbet.supercoctails.domain.usecase.search.AddRecentSearchUseCase
+import xyz.superbet.supercoctails.domain.usecase.search.DeleteRecentSearchUseCase
+import xyz.superbet.supercoctails.domain.usecase.search.GetRecentSearchesUseCase
 
 val dataModule = module {
     single {

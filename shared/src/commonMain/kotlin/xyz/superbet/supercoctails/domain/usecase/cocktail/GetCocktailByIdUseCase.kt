@@ -1,4 +1,4 @@
-package xyz.superbet.supercoctails.domain.usecase
+package xyz.superbet.supercoctails.domain.usecase.cocktail
 
 import xyz.superbet.supercoctails.domain.model.Cocktail
 import xyz.superbet.supercoctails.domain.repository.CocktailRepository

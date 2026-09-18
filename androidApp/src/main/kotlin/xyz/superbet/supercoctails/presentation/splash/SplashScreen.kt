@@ -28,7 +28,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import xyz.superbet.supercoctails.domain.usecase.GetRecommendedCocktailsUseCase
+import xyz.superbet.supercoctails.domain.usecase.cocktail.GetRecommendedCocktailsUseCase
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable

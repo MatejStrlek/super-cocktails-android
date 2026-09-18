@@ -17,12 +17,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import xyz.superbet.supercoctails.domain.usecase.AddRecentSearchUseCase
-import xyz.superbet.supercoctails.domain.usecase.DeleteRecentSearchUseCase
-import xyz.superbet.supercoctails.domain.usecase.GetRecentSearchesUseCase
-import xyz.superbet.supercoctails.domain.usecase.GetRecommendedCocktailsUseCase
-import xyz.superbet.supercoctails.domain.usecase.SearchCocktailsUseCase
-import xyz.superbet.supercoctails.domain.usecase.ToggleFavoriteUseCase
+import xyz.superbet.supercoctails.domain.usecase.cocktail.GetRecommendedCocktailsUseCase
+import xyz.superbet.supercoctails.domain.usecase.cocktail.SearchCocktailsUseCase
+import xyz.superbet.supercoctails.domain.usecase.cocktail.ToggleFavoriteUseCase
+import xyz.superbet.supercoctails.domain.usecase.search.AddRecentSearchUseCase
+import xyz.superbet.supercoctails.domain.usecase.search.DeleteRecentSearchUseCase
+import xyz.superbet.supercoctails.domain.usecase.search.GetRecentSearchesUseCase
 import xyz.superbet.supercoctails.presentation.state.ListUiState
 import kotlin.time.Duration.Companion.milliseconds
 
