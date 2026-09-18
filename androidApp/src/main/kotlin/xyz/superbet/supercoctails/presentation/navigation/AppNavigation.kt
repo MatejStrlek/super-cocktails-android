@@ -27,7 +27,7 @@ fun AppNavigation() {
             val id = backStackEntry.arguments?.getString("cocktailId") ?: return@composable
             DetailScreen(
                 cocktailId = id,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStackOnce() }
             )
         }
     }
