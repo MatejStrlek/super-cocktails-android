@@ -20,16 +20,21 @@ import xyz.superbet.supercoctails.data.model.CocktailResponse
 import xyz.superbet.supercoctails.domain.algorithm.assembleRecommendedCocktails
 import xyz.superbet.supercoctails.domain.repository.CocktailRepository
 
+private const val CACHE_TTL_MS = 10 * 60 * 1000L // 10 minutes
+
 class CocktailRepositoryImpl(
     private val client: HttpClient,
     private val cocktailDao: CocktailDao
 ) : CocktailRepository {
+    private val lastFetchedAt = mutableMapOf<String, Long>()
+
     override fun searchCocktails(query: String): Flow<List<Cocktail>> = flow {
         val cached = cocktailDao.searchCocktails(query).first()
         if (cached.isEmpty()) {
             val refresh = fetchQueryFromNetwork(query)
             upsertPreservingFlags(refresh)
-        } else {
+            markFetched(query)
+        } else if (isStale(query)) {
             refreshInBackground(query)
         }
         emitAll(cocktailDao.searchCocktails(query).map { list -> list.map { it.toDomainModel() } })
@@ -38,19 +43,30 @@ class CocktailRepositoryImpl(
     override suspend fun getCocktailById(id: String): Cocktail? {
         val cached = cocktailDao.getById(id)
         if (cached != null) {
-            revalidateInBackground(id)
+            if (isStale(id)) revalidateInBackground(id)
             return cached.toDomainModel()
         }
-        return fetchCocktailByIdFromNetwork(id)?.also { upsertPreservingFlags(listOf(it)) }
+        return fetchCocktailByIdFromNetwork(id)?.also {
+            upsertPreservingFlags(listOf(it))
+            markFetched(id)
+        }
     }
 
     override fun getRecommendedCocktails(): Flow<List<Cocktail>> = flow {
         val cached = cocktailDao.getRecommendedCocktails().first()
         if (cached.isEmpty()) {
-            val assembled = assembleRecommendedCocktails(search = { query -> fetchQueryFromNetwork(query) })
-            cocktailDao.upsertCocktails(assembled.map { it.toEntityModel().copy(isRecommended = true) })
+            val assembled =
+                assembleRecommendedCocktails(search = { query -> fetchQueryFromNetwork(query) })
+            cocktailDao.upsertCocktails(assembled.map {
+                it.toEntityModel().copy(isRecommended = true)
+            })
         }
-        emitAll(cocktailDao.getRecommendedCocktails().map { list -> list.map { it.toDomainModel() } })
+        emitAll(
+            cocktailDao.getRecommendedCocktails().map { list -> list.map { it.toDomainModel() } })
+    }
+
+    override suspend fun toggleFavorite(id: String) {
+        cocktailDao.toggleFavorite(id)
     }
 
     private fun revalidateInBackground(id: String) {
@@ -58,6 +74,7 @@ class CocktailRepositoryImpl(
             try {
                 val fresh = fetchCocktailByIdFromNetwork(id) ?: return@launch
                 upsertPreservingFlags(listOf(fresh))
+                markFetched(id)
             } catch (_: Exception) {
                 // network unavailable so cache stays as-is
             }
@@ -83,14 +100,20 @@ class CocktailRepositoryImpl(
             try {
                 val refresh = fetchQueryFromNetwork(query)
                 upsertPreservingFlags(refresh)
+                markFetched(query)
             } catch (_: Exception) {
                 // network unavailable so cache stays as-is
             }
         }
     }
 
-    override suspend fun toggleFavorite(id: String) {
-        cocktailDao.toggleFavorite(id)
+    private fun isStale(key: String): Boolean {
+        val last = lastFetchedAt[key] ?: return true
+        return System.currentTimeMillis() - last > CACHE_TTL_MS
+    }
+
+    private fun markFetched(key: String) {
+        lastFetchedAt[key] = System.currentTimeMillis()
     }
 
     private suspend fun upsertPreservingFlags(cocktails: List<Cocktail>) {
