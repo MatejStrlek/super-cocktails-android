@@ -1,20 +1,27 @@
-package xyz.superbet.supercoctails.presentation.list
+package xyz.superbet.supercoctails.presentation.list.element
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -22,9 +29,13 @@ import androidx.compose.ui.unit.sp
 fun ListTopBar(
     query: String,
     onQueryChanged: (String) -> Unit,
-    hasEverFocusedSearch: Boolean,
-    showRecommendedLabel: Boolean
+    onSearchFocused: () -> Unit,
+    onSearchUnfocused: () -> Unit,
+    onSearchSubmitted: () -> Unit,
+    showRecommendedLabel: Boolean,
+    isSearchFocused: Boolean
 ) {
+    val focusManager = LocalFocusManager.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -40,10 +51,10 @@ fun ListTopBar(
             color = MaterialTheme.colorScheme.onSurface
         )
 
-        if (hasEverFocusedSearch) {
-            HorizontalDivider(thickness = 4.dp, color = Color.Transparent)
-        }
-
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
         OutlinedTextField(
             value = query,
             onValueChange = onQueryChanged,
@@ -71,10 +82,27 @@ fun ListTopBar(
                 unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = Color.Transparent
             ),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = {
+                onSearchSubmitted()
+                focusManager.clearFocus()
+            }),
             modifier = Modifier
-                .fillMaxWidth()
+                .weight(1f)
                 .height(52.dp)
+                .onFocusChanged { focusState ->
+                    if (focusState.isFocused) onSearchFocused() else onSearchUnfocused()
+                }
         )
+        AnimatedVisibility(isSearchFocused) {
+                TextButton(onClick = {
+                    onQueryChanged("")
+                    focusManager.clearFocus()
+                }) {
+                    Text("Cancel")
+                }
+            }
+        }
 
         if (showRecommendedLabel) {
             Text(

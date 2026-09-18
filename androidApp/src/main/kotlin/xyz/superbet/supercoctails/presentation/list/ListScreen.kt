@@ -4,10 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,34 +14,26 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
 import org.koin.androidx.compose.koinViewModel
-import xyz.superbet.supercoctails.domain.model.Cocktail
+import xyz.superbet.supercoctails.presentation.list.element.CocktailRow
+import xyz.superbet.supercoctails.presentation.list.element.ListTopBar
+import xyz.superbet.supercoctails.presentation.list.element.RecentSearchesPanel
 import xyz.superbet.supercoctails.presentation.state.ListUiState
 
 @Composable
@@ -52,8 +42,7 @@ fun ListScreen(onCocktailClick: (String) -> Unit = {}) {
     val viewModel: ListViewModel = koinViewModel()
     val uiState: ListUiState by viewModel.uiState.collectAsState()
     val query by viewModel.searchQuery.collectAsState()
-
-    var hasEverFocusedSearch by remember { mutableStateOf(false) }
+    val isSearchFocused by viewModel.isSearchFocused.collectAsState()
 
     MaterialTheme {
         Column(
@@ -64,8 +53,11 @@ fun ListScreen(onCocktailClick: (String) -> Unit = {}) {
             ListTopBar(
                 query = query,
                 onQueryChanged = { viewModel.onQueryChanged(it) },
-                hasEverFocusedSearch = hasEverFocusedSearch,
-                showRecommendedLabel = uiState is ListUiState.Content && query.isBlank()
+                onSearchFocused = { viewModel.onSearchFocused() },
+                onSearchUnfocused = { viewModel.onSearchUnfocused() },
+                onSearchSubmitted = { viewModel.onSearchSubmitted() },
+                showRecommendedLabel = uiState is ListUiState.Content && query.isBlank(),
+                isSearchFocused = isSearchFocused
             )
 
             when (val state = uiState) {
@@ -84,17 +76,26 @@ fun ListScreen(onCocktailClick: (String) -> Unit = {}) {
                     }
                 }
 
+                is ListUiState.SearchFocused -> RecentSearchesPanel(
+                    recentSearches = state.recentSearches,
+                    onTermClick = { term ->
+                        viewModel.onQueryChanged(term)
+                        viewModel.onSearchSubmitted()
+                    },
+                    onTermDelete = { term -> viewModel.deleteRecentSearch(term) }
+                )
+
                 is ListUiState.Content -> LazyColumn(
-                    contentPadding = PaddingValues(
-                        horizontal = 20.dp,
-                        vertical = 8.dp
-                    ),
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(state.cocktails, key = { it.id }) { cocktail ->
                         CocktailRow(
                             cocktail = cocktail,
-                            onClick = { onCocktailClick(cocktail.id) },
+                            onClick = {
+                                viewModel.onCocktailClicked()
+                                onCocktailClick(cocktail.id)
+                            },
                             onFavoriteClick = { viewModel.toggleFavorite(cocktail.id) }
                         )
                     }
@@ -172,78 +173,6 @@ fun ListScreen(onCocktailClick: (String) -> Unit = {}) {
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun CocktailRow(cocktail: Cocktail, onClick: () -> Unit, onFavoriteClick: () -> Unit) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.padding(10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            AsyncImage(
-                model = cocktail.thumbnail,
-                contentDescription = cocktail.name,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(52.dp)
-                    .clip(RoundedCornerShape(14.dp))
-            )
-
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = cocktail.name,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 18.sp,
-                    style = MaterialTheme.typography.titleSmall
-                )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    cocktail.category?.let {
-                        Text(
-                            text = it.uppercase(),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    cocktail.alcoholic?.let {
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = MaterialTheme.colorScheme.errorContainer
-                        ) {
-                            Text(
-                                text = it.uppercase(),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onErrorContainer,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                            )
-                        }
-                    }
-                }
-            }
-
-            IconButton(onClick = onFavoriteClick, modifier = Modifier.size(36.dp)) {
-                Icon(
-                    imageVector = if (cocktail.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
-                    contentDescription = if (cocktail.isFavorite) "Remove from favorites" else "Add to favorites",
-                    tint = if (cocktail.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(22.dp)
-                )
             }
         }
     }

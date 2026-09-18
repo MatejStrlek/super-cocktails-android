@@ -11,6 +11,9 @@ import xyz.superbet.supercoctails.domain.usecase.SearchCocktailsUseCase
 import xyz.superbet.supercoctails.domain.usecase.GetRecommendedCocktailsUseCase
 import xyz.superbet.supercoctails.domain.usecase.GetCocktailByIdUseCase
 import xyz.superbet.supercoctails.domain.usecase.ToggleFavoriteUseCase
+import xyz.superbet.supercoctails.domain.usecase.GetRecentSearchesUseCase
+import xyz.superbet.supercoctails.domain.usecase.AddRecentSearchUseCase
+import xyz.superbet.supercoctails.domain.usecase.DeleteRecentSearchUseCase
 
 val dataModule = module {
     single {
@@ -25,4 +28,7 @@ val dataModule = module {
     single { GetRecommendedCocktailsUseCase(get()) }
     single { GetCocktailByIdUseCase(get()) }
     single { ToggleFavoriteUseCase(get()) }
+    single { GetRecentSearchesUseCase(get()) }
+    single { AddRecentSearchUseCase(get()) }
+    single { DeleteRecentSearchUseCase(get()) }
 }
