@@ -20,22 +20,21 @@ import xyz.superbet.supercoctails.data.model.CocktailResponse
 import xyz.superbet.supercoctails.domain.algorithm.assembleRecommendedCocktails
 import xyz.superbet.supercoctails.domain.repository.CocktailRepository
 
-private const val CACHE_TTL_MS = 10 * 60 * 1000L // 10 minutes
+private const val BASE_URL = "https://www.thecocktaildb.com/api/json/v1/1"
 
 class CocktailRepositoryImpl(
     private val client: HttpClient,
     private val cocktailDao: CocktailDao
 ) : CocktailRepository {
-    private val lastFetchedAt = mutableMapOf<String, Long>()
+    private val cacheTracker = CacheTracker()
 
     override fun searchCocktails(query: String): Flow<List<Cocktail>> = flow {
         val cached = cocktailDao.searchCocktails(query).first()
         if (cached.isEmpty()) {
-            val refresh = fetchQueryFromNetwork(query)
-            upsertPreservingFlags(refresh)
-            markFetched(query)
-        } else if (isStale(query)) {
-            refreshInBackground(query)
+            upsertPreservingFlags(fetchQueryFromNetwork(query))
+            cacheTracker.markFetched(query)
+        } else if (cacheTracker.isStale(query)) {
+            refreshInBackground(query) { fetchQueryFromNetwork(query) }
         }
         emitAll(cocktailDao.searchCocktails(query).map { list -> list.map { it.toDomainModel() } })
     }
@@ -43,12 +42,18 @@ class CocktailRepositoryImpl(
     override suspend fun getCocktailById(id: String): Cocktail? {
         val cached = cocktailDao.getById(id)
         if (cached != null) {
-            if (isStale(id)) revalidateInBackground(id)
+            if (cacheTracker.isStale(id)) refreshInBackground(id) {
+                fetchCocktailByIdFromNetwork(id)?.let {
+                    listOf(
+                        it
+                    )
+                } ?: emptyList()
+            }
             return cached.toDomainModel()
         }
         return fetchCocktailByIdFromNetwork(id)?.also {
             upsertPreservingFlags(listOf(it))
-            markFetched(id)
+            cacheTracker.markFetched(id)
         }
     }
 
@@ -69,51 +74,29 @@ class CocktailRepositoryImpl(
         cocktailDao.toggleFavorite(id)
     }
 
-    private fun revalidateInBackground(id: String) {
+    private fun refreshInBackground(key: String, fetch: suspend () -> List<Cocktail>) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val fresh = fetchCocktailByIdFromNetwork(id) ?: return@launch
-                upsertPreservingFlags(listOf(fresh))
-                markFetched(id)
+                upsertPreservingFlags(fetch())
+                cacheTracker.markFetched(key)
             } catch (_: Exception) {
-                // network unavailable so cache stays as-is
+                // network unavailable, cache stays as-is
             }
         }
     }
 
     private suspend fun fetchQueryFromNetwork(query: String): List<Cocktail> {
         val response: CocktailResponse = client
-            .get("https://www.thecocktaildb.com/api/json/v1/1/search.php?s=$query")
+            .get("$BASE_URL/search.php?s=$query")
             .body()
         return response.drinks?.map { it.toCocktail() } ?: emptyList()
     }
 
     private suspend fun fetchCocktailByIdFromNetwork(id: String): Cocktail? {
         val response: CocktailResponse = client
-            .get("https://www.thecocktaildb.com/api/json/v1/1/lookup.php?i=$id")
+            .get("$BASE_URL/lookup.php?i=$id")
             .body()
         return response.drinks?.firstOrNull()?.toCocktail()
-    }
-
-    private fun refreshInBackground(query: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val refresh = fetchQueryFromNetwork(query)
-                upsertPreservingFlags(refresh)
-                markFetched(query)
-            } catch (_: Exception) {
-                // network unavailable so cache stays as-is
-            }
-        }
-    }
-
-    private fun isStale(key: String): Boolean {
-        val last = lastFetchedAt[key] ?: return true
-        return System.currentTimeMillis() - last > CACHE_TTL_MS
-    }
-
-    private fun markFetched(key: String) {
-        lastFetchedAt[key] = System.currentTimeMillis()
     }
 
     private suspend fun upsertPreservingFlags(cocktails: List<Cocktail>) {
