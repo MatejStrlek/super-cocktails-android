@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.kotlinSerialization)
-    id("com.google.devtools.ksp") version "2.3.12"
+    alias(libs.plugins.ksp)
 }
 
 kotlin {
@@ -31,25 +31,25 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation("io.ktor:ktor-client-core:2.3.12")
-            implementation("io.insert-koin:koin-core:3.5.6")
-            implementation("io.ktor:ktor-client-content-negotiation:2.3.12")
-            implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.12")
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
-            implementation("androidx.room:room-runtime:2.8.5")
-            implementation("androidx.sqlite:sqlite-bundled:2.7.0")
+            implementation(libs.ktor.client.core)
+            implementation(libs.koin.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
         }
         androidMain.dependencies {
-            implementation("io.ktor:ktor-client-android:2.3.12")
-            implementation("io.insert-koin:koin-android:3.5.6")
-            implementation("io.insert-koin:koin-androidx-compose:3.5.6")
-            implementation("androidx.datastore:datastore-preferences:1.1.7")
-            implementation("androidx.room:room-runtime:2.8.5")
-            implementation("androidx.sqlite:sqlite-bundled:2.7.0")
+            implementation(libs.ktor.client.android)
+            implementation(libs.koin.android)
+            implementation(libs.koin.androidx.compose)
+            implementation(libs.androidx.datastore.preferences)
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+            implementation(libs.kotlinx.coroutines.test)
         }
     }
 }
