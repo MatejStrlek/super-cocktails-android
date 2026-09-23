@@ -17,7 +17,6 @@ import xyz.superbet.supercoctails.data.mapper.toDomainModel
 import xyz.superbet.supercoctails.data.mapper.toEntityModel
 import xyz.superbet.supercoctails.domain.model.Cocktail
 import xyz.superbet.supercoctails.data.model.CocktailResponse
-import xyz.superbet.supercoctails.domain.algorithm.assembleRecommendedCocktails
 import xyz.superbet.supercoctails.domain.repository.CocktailRepository
 
 private const val BASE_URL = "https://www.thecocktaildb.com/api/json/v1/1"
@@ -57,18 +56,18 @@ class CocktailRepositoryImpl(
         }
     }
 
-    override fun getRecommendedCocktails(): Flow<List<Cocktail>> = flow {
-        val cached = cocktailDao.getRecommendedCocktails().first()
-        if (cached.isEmpty()) {
-            val assembled =
-                assembleRecommendedCocktails(search = { query -> fetchQueryFromNetwork(query) })
-            cocktailDao.upsertCocktails(assembled.map {
-                it.toEntityModel().copy(isRecommended = true)
-            })
-        }
-        emitAll(
-            cocktailDao.getRecommendedCocktails().map { list -> list.map { it.toDomainModel() } })
+    override suspend fun searchCocktailsDirect(query: String): List<Cocktail> =
+        fetchQueryFromNetwork(query)
+
+    override fun observeRecommendedCocktails(): Flow<List<Cocktail>> =
+        cocktailDao.getRecommendedCocktails().map { list -> list.map { it.toDomainModel() } }
+
+    override suspend fun saveRecommendedCocktails(cocktails: List<Cocktail>) {
+        cocktailDao.upsertCocktails(cocktails.map { it.toEntityModel().copy(isRecommended = true) })
     }
+
+    override suspend fun hasRecommendedCocktails(): Boolean =
+        cocktailDao.getRecommendedCocktails().first().isNotEmpty()
 
     override suspend fun toggleFavorite(id: String) {
         cocktailDao.toggleFavorite(id)
