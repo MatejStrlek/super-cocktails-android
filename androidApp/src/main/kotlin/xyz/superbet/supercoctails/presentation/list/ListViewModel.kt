@@ -65,7 +65,7 @@ class ListViewModel(
                         if (cocktails.isEmpty()) ListUiState.Loading else ListUiState.Content(
                             cocktails
                         )
-                    }
+                    }.catch { e -> emit(ListUiState.Error(e.message ?: "Something went wrong")) }
                 // active search — debounce before hitting Room/network
                 else ->
                     flowOf(query)
