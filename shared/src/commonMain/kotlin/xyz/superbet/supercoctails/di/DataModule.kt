@@ -9,6 +9,7 @@ import xyz.superbet.supercoctails.data.repository.CocktailRepositoryImpl
 import xyz.superbet.supercoctails.domain.repository.CocktailRepository
 import xyz.superbet.supercoctails.domain.usecase.cocktail.GetCocktailByIdUseCase
 import xyz.superbet.supercoctails.domain.usecase.cocktail.GetRecommendedCocktailsUseCase
+import xyz.superbet.supercoctails.domain.usecase.cocktail.LoadRecommendedCocktailsUseCase
 import xyz.superbet.supercoctails.domain.usecase.cocktail.SearchCocktailsUseCase
 import xyz.superbet.supercoctails.domain.usecase.cocktail.ToggleFavoriteUseCase
 import xyz.superbet.supercoctails.domain.usecase.search.AddRecentSearchUseCase
@@ -28,6 +29,7 @@ val dataModule = module {
     single<CocktailRepository> { CocktailRepositoryImpl(get(), get()) }
     single { SearchCocktailsUseCase(get()) }
     single { GetRecommendedCocktailsUseCase(get()) }
+    single { LoadRecommendedCocktailsUseCase(get()) }
     single { GetCocktailByIdUseCase(get()) }
     single { ToggleFavoriteUseCase(get()) }
     single { GetRecentSearchesUseCase(get()) }

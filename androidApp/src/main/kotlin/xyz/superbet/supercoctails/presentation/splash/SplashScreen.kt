@@ -24,21 +24,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
-import xyz.superbet.supercoctails.domain.usecase.cocktail.GetRecommendedCocktailsUseCase
+import org.koin.androidx.compose.koinViewModel
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun SplashScreen(onTimeout: () -> Unit) {
-    val useCase: GetRecommendedCocktailsUseCase = koinInject()
-    val appScope: CoroutineScope = koinInject()
+    koinViewModel<SplashViewModel>()
 
     LaunchedEffect(Unit) {
-        appScope.launch { runCatching { useCase().first() } }
         delay(1500.milliseconds)
         onTimeout()
     }
@@ -100,7 +94,6 @@ private fun MartiniGlassIcon(modifier: Modifier = Modifier) {
         val w = size.width
         val h = size.height
 
-        // inverted triangle for bowl
         val bowlApexY = h * 0.556f
         drawPath(
             path = Path().apply {
@@ -113,7 +106,6 @@ private fun MartiniGlassIcon(modifier: Modifier = Modifier) {
             style = stroke
         )
 
-        // Stem: centered, from bowl apex to just above base
         drawLine(
             color = color,
             start = Offset(w / 2f, bowlApexY),
@@ -122,7 +114,6 @@ private fun MartiniGlassIcon(modifier: Modifier = Modifier) {
             cap = StrokeCap.Round
         )
 
-        // Base: horizontal, centered, just above bottom of canvas
         drawLine(
             color = color,
             start = Offset(w * 0.205f, h * 0.963f),
