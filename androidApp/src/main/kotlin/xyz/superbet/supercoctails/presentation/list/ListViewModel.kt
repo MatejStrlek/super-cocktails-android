@@ -13,16 +13,20 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import xyz.superbet.supercoctails.domain.model.ThemePreference
 import xyz.superbet.supercoctails.domain.usecase.cocktail.GetRecommendedCocktailsUseCase
 import xyz.superbet.supercoctails.domain.usecase.cocktail.SearchCocktailsUseCase
 import xyz.superbet.supercoctails.domain.usecase.cocktail.ToggleFavoriteUseCase
 import xyz.superbet.supercoctails.domain.usecase.search.AddRecentSearchUseCase
 import xyz.superbet.supercoctails.domain.usecase.search.DeleteRecentSearchUseCase
 import xyz.superbet.supercoctails.domain.usecase.search.GetRecentSearchesUseCase
+import xyz.superbet.supercoctails.domain.usecase.theme.GetThemePreferenceUseCase
+import xyz.superbet.supercoctails.domain.usecase.theme.SetThemePreferenceUseCase
 import xyz.superbet.supercoctails.presentation.state.ListUiState
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -33,13 +37,18 @@ class ListViewModel(
     getRecentSearchesUseCase: GetRecentSearchesUseCase,
     private val addRecentSearchUseCase: AddRecentSearchUseCase,
     private val deleteRecentSearchUseCase: DeleteRecentSearchUseCase,
+    getThemePreferenceUseCase: GetThemePreferenceUseCase,
+    private val setThemePreferenceUseCase: SetThemePreferenceUseCase,
 ) : ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
     private val _isSearchFocused = MutableStateFlow(false)
     val isSearchFocused: StateFlow<Boolean> = _isSearchFocused.asStateFlow()
 
-    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+    val themePreference: StateFlow<ThemePreference> = getThemePreferenceUseCase()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ThemePreference.SYSTEM)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<ListUiState> = combine(
         _searchQuery,
         _isSearchFocused,
@@ -49,7 +58,7 @@ class ListViewModel(
             when {
                 // focused with blank query — show recent searches immediately, no debounce
                 focused && query.isBlank() ->
-                    flow { emit(ListUiState.SearchFocused(recents)) }
+                    flowOf((ListUiState.SearchFocused(recents)))
                 // blank query, not focused — show recommended
                 query.isBlank() ->
                     getRecommendedCocktailsUseCase().map { cocktails ->
@@ -59,7 +68,7 @@ class ListViewModel(
                     }
                 // active search — debounce before hitting Room/network
                 else ->
-                    flow { emit(query) }
+                    flowOf(query)
                         .debounce(300.milliseconds)
                         .flatMapLatest { q ->
                             searchCocktailsUseCase(q)
@@ -113,5 +122,9 @@ class ListViewModel(
 
     fun toggleFavorite(id: String) {
         viewModelScope.launch { toggleFavoriteUseCase(id) }
+    }
+
+    fun setTheme(theme: ThemePreference) {
+        viewModelScope.launch { setThemePreferenceUseCase(theme) }
     }
 }

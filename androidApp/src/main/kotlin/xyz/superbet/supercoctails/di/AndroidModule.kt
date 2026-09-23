@@ -9,12 +9,15 @@ import org.koin.dsl.module
 import xyz.superbet.supercoctails.SuperCocktailsApp
 import xyz.superbet.supercoctails.data.local.AppDatabase
 import xyz.superbet.supercoctails.data.preferences.RecentSearchRepositoryImpl
+import xyz.superbet.supercoctails.data.preferences.ThemeRepositoryImpl
 import xyz.superbet.supercoctails.domain.repository.RecentSearchRepository
+import xyz.superbet.supercoctails.domain.repository.ThemeRepository
 import xyz.superbet.supercoctails.presentation.list.ListViewModel
 import xyz.superbet.supercoctails.presentation.detail.DetailViewModel
 
 val androidModule = module {
     single<RecentSearchRepository> { RecentSearchRepositoryImpl(androidContext()) }
+    single<ThemeRepository> { ThemeRepositoryImpl(androidContext()) }
     single<AppDatabase> {
         Room.databaseBuilder<AppDatabase>(
             androidContext(),
@@ -28,6 +31,8 @@ val androidModule = module {
     single { get<AppDatabase>().cocktailDao() }
     viewModel {
         ListViewModel(
+            get(),
+            get(),
             get(),
             get(),
             get(),

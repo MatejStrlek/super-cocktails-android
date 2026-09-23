@@ -10,7 +10,7 @@ import xyz.superbet.supercoctails.di.androidModule
 import xyz.superbet.supercoctails.di.dataModule
 
 class SuperCocktailsApp : Application() {
-    val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    val applicationScope = CoroutineScope(Dispatchers.Default)
 
     override fun onCreate() {
         super.onCreate()

@@ -3,13 +3,11 @@ package xyz.superbet.supercoctails.data.preferences
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import xyz.superbet.supercoctails.domain.repository.RecentSearchRepository
 
-private val Context.dataStore by preferencesDataStore(name = "supercocktails_prefs")
 private val KEY_RECENT_SEARCHES = stringPreferencesKey("recent_searches")
 private const val MAX_RECENT_SEARCHES = 5
 

@@ -39,6 +39,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import kotlinx.serialization.InternalSerializationApi
 import org.koin.androidx.compose.koinViewModel
 import xyz.superbet.supercoctails.domain.model.Cocktail
 import xyz.superbet.supercoctails.domain.model.Ingredient

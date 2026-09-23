@@ -43,13 +43,13 @@ fun ListScreen(onCocktailClick: (String) -> Unit = {}) {
     val uiState: ListUiState by viewModel.uiState.collectAsState()
     val query by viewModel.searchQuery.collectAsState()
     val isSearchFocused by viewModel.isSearchFocused.collectAsState()
+    val themePreference by viewModel.themePreference.collectAsState()
 
-    MaterialTheme {
-        Column(
-            modifier = Modifier
-                .statusBarsPadding()
-                .fillMaxSize()
-        ) {
+    Column(
+        modifier = Modifier
+            .statusBarsPadding()
+            .fillMaxSize()
+    ) {
             ListTopBar(
                 query = query,
                 onQueryChanged = { viewModel.onQueryChanged(it) },
@@ -57,7 +57,9 @@ fun ListScreen(onCocktailClick: (String) -> Unit = {}) {
                 onSearchUnfocused = { viewModel.onSearchUnfocused() },
                 onSearchSubmitted = { viewModel.onSearchSubmitted() },
                 showRecommendedLabel = uiState is ListUiState.Content && query.isBlank(),
-                isSearchFocused = isSearchFocused
+                isSearchFocused = isSearchFocused,
+                currentTheme = themePreference,
+                onThemeSelected = { viewModel.setTheme(it) }
             )
 
             when (val state = uiState) {
@@ -175,5 +177,4 @@ fun ListScreen(onCocktailClick: (String) -> Unit = {}) {
                 }
             }
         }
-    }
 }
