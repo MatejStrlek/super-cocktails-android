@@ -162,7 +162,7 @@ fun ListScreen(onCocktailClick: (String) -> Unit = {}) {
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Surface(
-                            onClick = { viewModel.onQueryChanged(query) },
+                            onClick = { viewModel.retry() },
                             shape = RoundedCornerShape(8.dp),
                             color = MaterialTheme.colorScheme.error
                         ) {

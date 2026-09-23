@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import xyz.superbet.supercoctails.domain.model.ThemePreference
 import xyz.superbet.supercoctails.domain.usecase.cocktail.GetRecommendedCocktailsUseCase
@@ -44,6 +45,7 @@ class ListViewModel(
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
     private val _isSearchFocused = MutableStateFlow(false)
     val isSearchFocused: StateFlow<Boolean> = _isSearchFocused.asStateFlow()
+    private val _retryTrigger = MutableStateFlow(0)
 
     val themePreference: StateFlow<ThemePreference> = getThemePreferenceUseCase()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ThemePreference.SYSTEM)
@@ -52,8 +54,9 @@ class ListViewModel(
     val uiState: StateFlow<ListUiState> = combine(
         _searchQuery,
         _isSearchFocused,
+        _retryTrigger,
         getRecentSearchesUseCase()
-    ) { query, focused, recents -> Triple(query, focused, recents) }
+    ) { query, focused, _, recents -> Triple(query, focused, recents) }
         .flatMapLatest { (query, focused, recents) ->
             when {
                 // focused with blank query — show recent searches immediately, no debounce
@@ -126,5 +129,9 @@ class ListViewModel(
 
     fun setTheme(theme: ThemePreference) {
         viewModelScope.launch { setThemePreferenceUseCase(theme) }
+    }
+
+    fun retry() {
+        _retryTrigger.update { it + 1 }
     }
 }
