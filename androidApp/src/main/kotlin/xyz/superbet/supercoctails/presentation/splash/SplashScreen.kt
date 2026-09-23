@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import xyz.superbet.supercoctails.domain.usecase.cocktail.GetRecommendedCocktailsUseCase
@@ -37,7 +38,7 @@ fun SplashScreen(onTimeout: () -> Unit) {
     val appScope: CoroutineScope = koinInject()
 
     LaunchedEffect(Unit) {
-        appScope.launch { runCatching { useCase() } }
+        appScope.launch { runCatching { useCase().first() } }
         delay(1500.milliseconds)
         onTimeout()
     }
