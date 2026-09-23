@@ -3,6 +3,7 @@ package xyz.superbet.supercoctails.di
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.koin.dsl.module
 import xyz.superbet.supercoctails.data.repository.CocktailRepositoryImpl
@@ -26,7 +27,7 @@ val dataModule = module {
             }
         }
     }
-    single<CocktailRepository> { CocktailRepositoryImpl(get(), get()) }
+    single<CocktailRepository> { CocktailRepositoryImpl(get(), get(), Dispatchers.IO) }
     single { SearchCocktailsUseCase(get()) }
     single { GetRecommendedCocktailsUseCase(get()) }
     single { LoadRecommendedCocktailsUseCase(get()) }

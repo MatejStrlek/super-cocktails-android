@@ -3,14 +3,16 @@ package xyz.superbet.supercoctails.data.repository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import xyz.superbet.supercoctails.data.local.CocktailDao
 import xyz.superbet.supercoctails.data.mapper.toCocktail
 import xyz.superbet.supercoctails.data.mapper.toDomainModel
@@ -23,8 +25,10 @@ private const val BASE_URL = "https://www.thecocktaildb.com/api/json/v1/1"
 
 class CocktailRepositoryImpl(
     private val client: HttpClient,
-    private val cocktailDao: CocktailDao
+    private val cocktailDao: CocktailDao,
+    private val ioDispatcher: CoroutineDispatcher,
 ) : CocktailRepository {
+    private val repositoryScope = CoroutineScope(SupervisorJob() + ioDispatcher)
     private val cacheTracker = CacheTracker()
 
     override fun searchCocktails(query: String): Flow<List<Cocktail>> = flow {
@@ -74,7 +78,7 @@ class CocktailRepositoryImpl(
     }
 
     private fun refreshInBackground(key: String, fetch: suspend () -> List<Cocktail>) {
-        CoroutineScope(Dispatchers.IO).launch {
+        repositoryScope.launch {
             try {
                 upsertPreservingFlags(fetch())
                 cacheTracker.markFetched(key)
@@ -84,35 +88,38 @@ class CocktailRepositoryImpl(
         }
     }
 
-    private suspend fun fetchQueryFromNetwork(query: String): List<Cocktail> {
-        val response: CocktailResponse = client
-            .get("$BASE_URL/search.php?s=$query")
-            .body()
-        return response.drinks?.map { it.toCocktail() } ?: emptyList()
-    }
-
-    private suspend fun fetchCocktailByIdFromNetwork(id: String): Cocktail? {
-        val response: CocktailResponse = client
-            .get("$BASE_URL/lookup.php?i=$id")
-            .body()
-        return response.drinks?.firstOrNull()?.toCocktail()
-    }
-
-    private suspend fun upsertPreservingFlags(cocktails: List<Cocktail>) {
-        val incoming = cocktails.map { it.toEntityModel() }
-        val existing = cocktailDao.getByIds(incoming.map { it.id }).associateBy { it.id }
-        val merged = incoming.map { new ->
-            existing[new.id]?.copy(
-                name = new.name,
-                category = new.category,
-                alcoholic = new.alcoholic,
-                thumbnail = new.thumbnail,
-                glass = new.glass,
-                instructions = new.instructions,
-                dateModified = new.dateModified,
-                ingredients = new.ingredients,
-            ) ?: new
+    private suspend fun fetchQueryFromNetwork(query: String): List<Cocktail> =
+        withContext(ioDispatcher) {
+            val response: CocktailResponse = client
+                .get("$BASE_URL/search.php?s=$query")
+                .body()
+            response.drinks?.map { it.toCocktail() } ?: emptyList()
         }
-        cocktailDao.upsertCocktails(merged)
-    }
+
+    private suspend fun fetchCocktailByIdFromNetwork(id: String): Cocktail? =
+        withContext(ioDispatcher) {
+            val response: CocktailResponse = client
+                .get("$BASE_URL/lookup.php?i=$id")
+                .body()
+            response.drinks?.firstOrNull()?.toCocktail()
+        }
+
+    private suspend fun upsertPreservingFlags(cocktails: List<Cocktail>) =
+        withContext(ioDispatcher) {
+            val incoming = cocktails.map { it.toEntityModel() }
+            val existing = cocktailDao.getByIds(incoming.map { it.id }).associateBy { it.id }
+            val merged = incoming.map { new ->
+                existing[new.id]?.copy(
+                    name = new.name,
+                    category = new.category,
+                    alcoholic = new.alcoholic,
+                    thumbnail = new.thumbnail,
+                    glass = new.glass,
+                    instructions = new.instructions,
+                    dateModified = new.dateModified,
+                    ingredients = new.ingredients,
+                ) ?: new
+            }
+            cocktailDao.upsertCocktails(merged)
+        }
 }
