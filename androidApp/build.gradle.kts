@@ -24,9 +24,6 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.7.5")
     implementation("io.coil-kt.coil3:coil-compose:3.2.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.2.0")
-    implementation(libs.androidx.room.ktx)
-    implementation(libs.androidx.sqlite.bundled)
-    implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
 
     implementation(libs.compose.runtime)

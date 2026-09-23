@@ -43,6 +43,9 @@ kotlin {
             implementation("io.ktor:ktor-client-android:2.3.12")
             implementation("io.insert-koin:koin-android:3.5.6")
             implementation("io.insert-koin:koin-androidx-compose:3.5.6")
+            implementation("androidx.datastore:datastore-preferences:1.1.7")
+            implementation("androidx.room:room-runtime:2.8.5")
+            implementation("androidx.sqlite:sqlite-bundled:2.7.0")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
