@@ -61,7 +61,7 @@ class ListViewModel(
             when {
                 // focused with blank query — show recent searches immediately, no debounce
                 focused && query.isBlank() ->
-                    flowOf((ListUiState.SearchFocused(recents)))
+                    flowOf(ListUiState.SearchFocused(recents))
                 // blank query, not focused — show recommended
                 query.isBlank() ->
                     getRecommendedCocktailsUseCase().map { cocktails ->
