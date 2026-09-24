@@ -37,9 +37,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import kotlinx.serialization.InternalSerializationApi
 import org.koin.androidx.compose.koinViewModel
 import xyz.superbet.supercoctails.domain.model.Cocktail
 import xyz.superbet.supercoctails.domain.model.Ingredient
@@ -52,7 +52,21 @@ fun DetailScreen(cocktailId: String, onBack: () -> Unit) {
 
     LaunchedEffect(cocktailId) { viewModel.load(cocktailId) }
 
-    when (val state = uiState) {
+    DetailScreenContent(
+        uiState = uiState,
+        onBack = onBack,
+        onFavoriteClick = { viewModel.toggleFavorite(it) },
+    )
+}
+
+@Composable
+@Preview
+fun DetailScreenContent(
+    uiState: DetailUiState = DetailUiState.Loading,
+    onBack: () -> Unit = {},
+    onFavoriteClick: (String) -> Unit = {},
+) {
+    when (uiState) {
         is DetailUiState.Loading -> Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -68,9 +82,9 @@ fun DetailScreen(cocktailId: String, onBack: () -> Unit) {
         }
 
         is DetailUiState.Content -> DetailContent(
-            cocktail = state.cocktail,
+            cocktail = uiState.cocktail,
             onBack = onBack,
-            onFavoriteClick = { viewModel.toggleFavorite(state.cocktail.id) }
+            onFavoriteClick = { onFavoriteClick(uiState.cocktail.id) },
         )
     }
 }
