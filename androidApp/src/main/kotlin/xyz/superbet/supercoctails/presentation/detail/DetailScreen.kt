@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -81,6 +83,7 @@ fun DetailScreenContent(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun DetailContent(cocktail: Cocktail, onBack: () -> Unit, onFavoriteClick: () -> Unit) {
     Column(
@@ -127,7 +130,10 @@ private fun DetailContent(cocktail: Cocktail, onBack: () -> Unit, onFavoriteClic
             Spacer(modifier = Modifier.height(16.dp))
 
             // Tags row
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
                 cocktail.category?.let { TagChip(it) }
                 cocktail.glass?.let { TagChip(it) }
                 cocktail.alcoholic?.let { TagChip(it, highlighted = true) }

@@ -2,6 +2,8 @@ package xyz.superbet.supercoctails.presentation.list.element
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,7 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import xyz.superbet.supercoctails.domain.model.Cocktail
+import xyz.superbet.supercoctails.ui.component.TagChip
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CocktailRow(cocktail: Cocktail, onClick: () -> Unit, onFavoriteClick: () -> Unit) {
     Surface(
@@ -58,31 +62,12 @@ fun CocktailRow(cocktail: Cocktail, onClick: () -> Unit, onFavoriteClick: () -> 
                     fontSize = 18.sp,
                     style = MaterialTheme.typography.titleSmall
                 )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    cocktail.category?.let {
-                        Text(
-                            text = it.uppercase(),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    cocktail.alcoholic?.let {
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = MaterialTheme.colorScheme.errorContainer
-                        ) {
-                            Text(
-                                text = it.uppercase(),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onErrorContainer,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                            )
-                        }
-                    }
+                    cocktail.category?.let { TagChip(it) }
+                    cocktail.alcoholic?.let { TagChip(it, highlighted = true) }
                 }
             }
 
