@@ -3,6 +3,7 @@ package xyz.superbet.supercoctails.data.repository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -82,6 +83,8 @@ class CocktailRepositoryImpl(
             try {
                 upsertPreservingFlags(fetch())
                 cacheTracker.markFetched(key)
+            } catch (e: CancellationException) {
+                throw e
             } catch (_: Exception) {
                 // network unavailable, cache stays as-is
             }

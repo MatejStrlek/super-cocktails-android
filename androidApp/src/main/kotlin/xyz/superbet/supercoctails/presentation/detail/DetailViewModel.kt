@@ -2,6 +2,7 @@ package xyz.superbet.supercoctails.presentation.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,6 +23,8 @@ class DetailViewModel(
             try {
                 val cocktail = getCocktailByIdUseCase(id)
                 _uiState.value = if (cocktail != null) DetailUiState.Content(cocktail) else DetailUiState.Error
+            } catch (e: CancellationException) {
+                throw e
             } catch (_: Exception) {
                 _uiState.value = DetailUiState.Error
             }
