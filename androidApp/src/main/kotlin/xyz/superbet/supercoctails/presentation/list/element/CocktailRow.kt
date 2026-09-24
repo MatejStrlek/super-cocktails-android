@@ -63,7 +63,7 @@ fun CocktailRow(cocktail: Cocktail, onClick: () -> Unit, onFavoriteClick: () -> 
                     style = MaterialTheme.typography.titleSmall
                 )
                 FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     cocktail.category?.let { TagChip(it) }

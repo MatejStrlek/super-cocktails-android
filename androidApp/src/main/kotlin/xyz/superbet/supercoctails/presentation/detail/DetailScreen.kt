@@ -131,7 +131,7 @@ private fun DetailContent(cocktail: Cocktail, onBack: () -> Unit, onFavoriteClic
 
             // Tags row
             FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 cocktail.category?.let { TagChip(it) }
