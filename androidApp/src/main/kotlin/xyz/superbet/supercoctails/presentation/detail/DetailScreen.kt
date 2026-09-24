@@ -21,7 +21,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,6 +43,9 @@ import org.koin.androidx.compose.koinViewModel
 import xyz.superbet.supercoctails.domain.model.Cocktail
 import xyz.superbet.supercoctails.domain.model.Ingredient
 import xyz.superbet.supercoctails.presentation.state.DetailUiState
+import xyz.superbet.supercoctails.ui.component.ErrorState
+import xyz.superbet.supercoctails.ui.component.LoadingState
+import xyz.superbet.supercoctails.ui.component.TagChip
 
 @Composable
 fun DetailScreen(cocktailId: String, onBack: () -> Unit) {
@@ -67,19 +69,9 @@ fun DetailScreenContent(
     onFavoriteClick: (String) -> Unit = {},
 ) {
     when (uiState) {
-        is DetailUiState.Loading -> Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
+        is DetailUiState.Loading -> LoadingState()
 
-        is DetailUiState.Error -> Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Could not load cocktail.", style = MaterialTheme.typography.bodyLarge)
-        }
+        is DetailUiState.Error -> ErrorState(message = "Could not load cocktail.")
 
         is DetailUiState.Content -> DetailContent(
             cocktail = uiState.cocktail,
@@ -138,7 +130,7 @@ private fun DetailContent(cocktail: Cocktail, onBack: () -> Unit, onFavoriteClic
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 cocktail.category?.let { TagChip(it) }
                 cocktail.glass?.let { TagChip(it) }
-                cocktail.alcoholic?.let { TagChip(it, isAlcoholic = true) }
+                cocktail.alcoholic?.let { TagChip(it, highlighted = true) }
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -231,22 +223,5 @@ private fun IngredientRow(ingredient: Ingredient) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-    }
-}
-
-@Composable
-private fun TagChip(label: String, isAlcoholic: Boolean = false) {
-    val background = if (isAlcoholic) MaterialTheme.colorScheme.errorContainer
-                     else MaterialTheme.colorScheme.surfaceVariant
-    val textColor = if (isAlcoholic) MaterialTheme.colorScheme.onErrorContainer
-                    else MaterialTheme.colorScheme.onSurfaceVariant
-    Surface(shape = RoundedCornerShape(8.dp), color = background) {
-        Text(
-            text = label.uppercase(),
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = if (isAlcoholic) FontWeight.Bold else FontWeight.Normal,
-            color = textColor,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-        )
     }
 }

@@ -2,21 +2,15 @@ package xyz.superbet.supercoctails.presentation.list.element
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrightnessAuto
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -26,15 +20,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import xyz.superbet.supercoctails.domain.model.ThemePreference
+import xyz.superbet.supercoctails.ui.component.SearchTextField
 
 @Composable
 fun ListTopBar(
@@ -109,46 +101,19 @@ fun ListTopBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-        OutlinedTextField(
-            value = query,
-            onValueChange = onQueryChanged,
-            placeholder = {
-                Text(
-                    text = "Search by name",
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 16.sp,
-                    lineHeight = 22.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            },
-            singleLine = true,
-            shape = RoundedCornerShape(26.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                unfocusedBorderColor = Color.Transparent,
-                focusedBorderColor = Color.Transparent
-            ),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(onSearch = {
-                onSearchSubmitted()
-                focusManager.clearFocus()
-            }),
-            modifier = Modifier
-                .weight(1f)
-                .height(52.dp)
-                .onFocusChanged { focusState ->
-                    if (focusState.isFocused) onSearchFocused() else onSearchUnfocused()
-                }
-        )
-        AnimatedVisibility(isSearchFocused) {
+            SearchTextField(
+                value = query,
+                onValueChange = onQueryChanged,
+                onSubmit = {
+                    onSearchSubmitted()
+                    focusManager.clearFocus()
+                },
+                onFocusChanged = { focused ->
+                    if (focused) onSearchFocused() else onSearchUnfocused()
+                },
+                modifier = Modifier.weight(1f),
+            )
+            AnimatedVisibility(isSearchFocused) {
                 TextButton(onClick = {
                     onQueryChanged("")
                     focusManager.clearFocus()
