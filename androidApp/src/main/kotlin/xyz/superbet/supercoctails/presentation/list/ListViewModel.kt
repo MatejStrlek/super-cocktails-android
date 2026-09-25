@@ -46,7 +46,6 @@ class ListViewModel(
     private val _isSearchFocused = MutableStateFlow(false)
     val isSearchFocused: StateFlow<Boolean> = _isSearchFocused.asStateFlow()
     private val _retryTrigger = MutableStateFlow(0)
-
     private val _searchErrorEvent = Channel<String>(Channel.BUFFERED)
     val searchErrorEvent = _searchErrorEvent.receiveAsFlow()
 

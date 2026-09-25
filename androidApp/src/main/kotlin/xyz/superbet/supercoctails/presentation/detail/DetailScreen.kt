@@ -36,14 +36,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import org.koin.androidx.compose.koinViewModel
 import xyz.superbet.supercoctails.domain.model.Cocktail
 import xyz.superbet.supercoctails.domain.model.Ingredient
 import xyz.superbet.supercoctails.presentation.state.DetailUiState
+import xyz.superbet.supercoctails.ui.component.CocktailImage
 import xyz.superbet.supercoctails.ui.component.ErrorState
 import xyz.superbet.supercoctails.ui.component.LoadingState
 import xyz.superbet.supercoctails.ui.component.TagChip
@@ -96,10 +95,9 @@ private fun DetailContent(cocktail: Cocktail, onBack: () -> Unit, onFavoriteClic
                 .fillMaxWidth()
                 .height(260.dp)
         ) {
-            AsyncImage(
-                model = cocktail.thumbnail,
+            CocktailImage(
+                url = cocktail.thumbnail,
                 contentDescription = cocktail.name,
-                contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
             IconButton(
