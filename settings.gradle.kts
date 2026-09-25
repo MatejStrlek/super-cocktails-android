@@ -1,4 +1,4 @@
-rootProject.name = "SuperCoctails"
+rootProject.name = "SuperCocktails"
 
 pluginManagement {
     repositories {

@@ -41,11 +41,11 @@ dependencies {
 }
 
 android {
-    namespace = "xyz.superbet.supercoctails"
+    namespace = "xyz.superbet.supercocktails"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "xyz.superbet.supercoctails"
+        applicationId = "xyz.superbet.supercocktails"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
